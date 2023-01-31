@@ -3,18 +3,59 @@ import CartContext from "./cart-context";
 
 const CartProvider = (props) => {
     const [ items, updateItems] = useState([]);
+    const [totalAmount, setTotalAmount] = useState(0);
+    
     const addItemToCartHandler = item => {
-        updateItems([...items,item]);
-        //console.log('inside additem', CartContext)
-    };
+        let isPresent = false;
 
-    const removeItemFromHandler = id => {};
+        for (var i = 0; i < items.length; i++) {
+          if (items[i].id === item.id) {
+            isPresent = true;
+          }
+        }
+        const newItem =
+          items.length > 0 && isPresent
+            ? items.map((data) => {
+                if (data.id === item.id) {
+                  data.quantity = Number(data.quantity) + Number(item.quantity);
+                }
+                return data;
+              })
+            : [...items, item];
+        
+        const total = newItem.reduce(getSum, 0);
+        
+        function getSum(total, newItem) {
+          return total + newItem.price * newItem.quantity;
+        }
+        setTotalAmount(total);
+        setItems(newItem);
+      };
+
+    const removeItemFromHandler = id => {
+        console.log(id);
+    
+    const newItem = items.map((item) => {
+      if (item.id === id) {
+        return { ...item, quantity: item.quantity - 1 };
+      }
+      return item;
+    });
+    
+    const total = newItem.reduce(getSum, 0);
+
+    function getSum(total, newItem) {
+      return total + newItem.price * newItem.quantity;
+    }
+    setTotalAmount(total);
+    setItems(newItem);
+  };
 
     const cartContext = {
-        items: [],
+        items: items,
+        totalAmount,
         addItem: addItemToCartHandler,
         removeItem: removeItemFromHandler,
-        message: 'Click here'
     };
 
     return (
